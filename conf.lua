@@ -1,6 +1,6 @@
 -- Default settings for game.
 GAME_WIDTH = 600
-GAME_HEIGHT = 600
+GAME_HEIGHT = 700
 SCALE_FACTOR = 1
 
 function love.conf(t)
