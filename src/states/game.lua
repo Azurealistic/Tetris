@@ -10,3 +10,5 @@ function game:update(dt) end
 function game:draw() end
 
 function game:leave() end
+
+return game
