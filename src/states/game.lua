@@ -1,30 +1,55 @@
 local ecs = require("libs.evolved")
-local shapes = require("src.utils.shapes")
 local config = require("src.utils.config")
 local groups = require("src.utils.groups")
-local piece = require("src.entities.piece")
 local input = require("src.utils.input")
+local board = require("src.utils.board")
+local piece = require("src.entities.piece")
+local controlled = require("src.fragments.controlled")
 
-require("src.systems.draw")
-require("src.systems.gravity")
-require("src.systems.input")
+-- Order matters: input -> gravity -> lock.
+require("src.systems.draw") -- groups.draw
+require("src.systems.draw_blocks") -- groups.draw
+require("src.systems.input") -- groups.update (1st)
+require("src.systems.gravity") -- groups.update (2nd)
+require("src.systems.lock") -- groups.update (3rd)
 
 local game = {}
 
--- TEMPORARY: debug helpers.
-local current, kind_index = nil, 1
+local KEYMAP = {
+	left = "left",
+	right = "right",
+	up = "rotate_cw",
+	x = "rotate_cw",
+	rctrl = "rotate_ccw",
+	lctrl = "rotate_ccw",
+	z = "rotate_ccw",
+	space = "hard_drop",
+}
+
+local controlled_query = ecs.builder():include(controlled):build()
+
+local function start()
+	ecs.batch_destroy(controlled_query)
+	board.clear()
+	input.clear()
+	piece.spawn(piece.random_kind())
+end
 
 function game:enter()
-	kind_index = 1
-	current = piece.spawn(shapes.kinds[kind_index])
+	start()
 end
 
 function game:update(dt)
+	input.soft_drop = love.keyboard.isDown("down")
+
 	ecs.process_with(groups.update, dt)
+
+	if board.game_over then
+		start()
+	end
 end
 
 function game:draw()
-	-- board outline
 	love.graphics.setColor(1, 1, 1)
 	love.graphics.rectangle(
 		"line",
@@ -33,26 +58,14 @@ function game:draw()
 		config.BOARD_W * config.CELL,
 		config.BOARD_H * config.CELL
 	)
+
 	ecs.process(groups.draw)
 end
 
--- TEMPORARY: space = next kind, up = rotate clockwise.
--- Needs love.keypressed forwarded to the active state.
 function game:keypressed(key)
-	if key == "left" then
-		input.push("left")
-	elseif key == "right" then
-		input.push("right")
-	elseif key == "down" then
-		input.push("down")
-	elseif key == "up" then
-		input.push("rotate_cw")
-	elseif key == "z" then
-		input.push("rotate_ccw")
-	elseif key == "space" then
-		ecs.destroy(current)
-		kind_index = kind_index % #shapes.kinds + 1
-		current = piece.spawn(shapes.kinds[kind_index])
+	local action = KEYMAP[key]
+	if action then
+		input.push(action)
 	end
 end
 

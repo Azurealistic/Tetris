@@ -10,12 +10,12 @@ local row = require("src.fragments.row")
 local kind = require("src.fragments.kind")
 local rot = require("src.fragments.rot")
 local fall_acc = require("src.fragments.fall_acc")
+local lock_timer = require("src.fragments.lock_timer")
 local controlled = require("src.fragments.controlled")
 
 local fits = collision.fits
 
--- Try the new rotation with each kick offset in turn; the first that fits wins.
-local function try_rotate(k, r, c, rw, new_rot)
+local function try_rotate(k, c, rw, new_rot)
 	for _, kick in ipairs(config.ROTATION_KICKS) do
 		local nc, nr = c + kick[1], rw + kick[2]
 		if fits(k, new_rot, nc, nr) then
@@ -28,13 +28,14 @@ end
 return ecs.builder()
 	:name("systems.input")
 	:group(groups.update)
-	:include(controlled, col, row, kind, rot, fall_acc)
+	:include(controlled, col, row, kind, rot, fall_acc, lock_timer)
 	:execute(function(chunk, entity_list, entity_count)
 		local cols = chunk:components(col)
 		local rows = chunk:components(row)
 		local kinds = chunk:components(kind)
 		local rots = chunk:components(rot)
 		local accs = chunk:components(fall_acc)
+		local timers = chunk:components(lock_timer)
 
 		for i = 1, entity_count do
 			-- Actions are applied in the order they were pressed.
@@ -50,17 +51,16 @@ return ecs.builder()
 					if fits(k, r, c + 1, rw) then
 						cols[i] = c + 1
 					end
-				elseif action == "down" then
-					if fits(k, r, c, rw + 1) then
-						rows[i] = rw + 1
-						accs[i] = 0 -- don't let gravity also drop it this frame
-					end
+				elseif action == "hard_drop" then
+					rows[i] = collision.drop_row(k, r, c, rw)
+					accs[i] = 0
+					timers[i] = config.LOCK_DELAY
 				elseif action == "rotate_cw" or action == "rotate_ccw" then
 					local new_rot = action == "rotate_cw" and shapes.rotate_cw(r) or shapes.rotate_ccw(r)
-					local nc, nr, nrot = try_rotate(k, r, c, rw, new_rot)
+					local nc, nr, nrot = try_rotate(k, c, rw, new_rot)
 					if nc then
 						cols[i], rows[i], rots[i] = nc, nr, nrot
-					end
+					end -- else: refused, piece stays as it was
 				end
 			end
 		end

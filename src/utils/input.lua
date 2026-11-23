@@ -1,6 +1,7 @@
 local input = {
 	queue = {},
 	count = 0,
+	soft_drop = false,
 }
 
 function input.push(action)

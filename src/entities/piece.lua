@@ -1,6 +1,7 @@
 local ecs = require("libs.evolved")
 local shapes = require("src.utils.shapes")
 local config = require("src.utils.config")
+local collision = require("src.utils.collision")
 
 local col = require("src.fragments.col")
 local row = require("src.fragments.row")
@@ -12,17 +13,27 @@ local controlled = require("src.fragments.controlled")
 
 local piece = {}
 
+-- Center the n-wide box: (W - n) empty columns split left/right, floored,
+-- +1 to convert the 0-based count into a 1-based column.
+local function start_col(piece_kind)
+	return math.floor((config.BOARD_W - shapes.size[piece_kind]) / 2) + 1
+end
+
+function piece.random_kind()
+	local random = (love and love.math and love.math.random) or math.random
+	return shapes.kinds[random(#shapes.kinds)]
+end
+
+-- False when the spawn position is already blocked (the stack reached the top).
+function piece.can_spawn(piece_kind)
+	return collision.fits(piece_kind, 1, start_col(piece_kind), 1)
+end
+
 -- Spawns a piece with every fragment it will ever need, so no structural
 -- changes (fragment add/remove) are required later.
 function piece.spawn(piece_kind)
-	local n = shapes.size[piece_kind]
-
-	-- Center the n-wide box: (W - n) empty columns split left/right, floored,
-	-- +1 to convert the 0-based count into a 1-based column.
-	local start_col = math.floor((config.BOARD_W - n) / 2) + 1
-
 	return ecs.spawn({
-		[col] = start_col,
+		[col] = start_col(piece_kind),
 		[row] = 1,
 		[kind] = piece_kind,
 		[rot] = 1,

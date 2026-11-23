@@ -1,23 +1,14 @@
--- Draws every entity that has col/row/kind/rot.
+-- Draws the falling piece: every entity with col/row/kind/rot.
 local ecs = require("libs.evolved")
 local shapes = require("src.utils.shapes")
 local config = require("src.utils.config")
+local colors = require("src.utils.colors")
 local groups = require("src.utils.groups")
 
 local col = require("src.fragments.col")
 local row = require("src.fragments.row")
 local kind = require("src.fragments.kind")
 local rot = require("src.fragments.rot")
-
-local COLORS = {
-	I = { 0.00, 0.94, 0.94 },
-	O = { 0.94, 0.94, 0.00 },
-	T = { 0.63, 0.00, 0.94 },
-	S = { 0.00, 0.94, 0.00 },
-	Z = { 0.94, 0.00, 0.00 },
-	J = { 0.00, 0.00, 0.94 },
-	L = { 0.94, 0.63, 0.00 },
-}
 
 local CELL, BX, BY = config.CELL, config.BOARD_X, config.BOARD_Y
 
@@ -33,7 +24,7 @@ return ecs.builder()
 
 		for i = 1, entity_count do
 			local k = kinds[i]
-			local c = COLORS[k]
+			local c = colors[k]
 			love.graphics.setColor(c[1], c[2], c[3])
 
 			for _, cell in ipairs(shapes.cells(k, rots[i])) do
