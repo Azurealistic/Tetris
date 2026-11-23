@@ -3,13 +3,15 @@ local shapes = require("src.utils.shapes")
 local config = require("src.utils.config")
 local groups = require("src.utils.groups")
 local piece = require("src.entities.piece")
-local rot = require("src.fragments.rot")
+local input = require("src.utils.input")
 
-require("src.systems.draw") -- registers the draw system into groups.draw
+require("src.systems.draw")
+require("src.systems.gravity")
+require("src.systems.input")
 
 local game = {}
 
--- TEMPORARY: debug helpers so you can eyeball every kind/rotation.
+-- TEMPORARY: debug helpers.
 local current, kind_index = nil, 1
 
 function game:enter()
@@ -18,7 +20,7 @@ function game:enter()
 end
 
 function game:update(dt)
-	ecs.process(groups.update)
+	ecs.process_with(groups.update, dt)
 end
 
 function game:draw()
@@ -31,19 +33,26 @@ function game:draw()
 		config.BOARD_W * config.CELL,
 		config.BOARD_H * config.CELL
 	)
-
 	ecs.process(groups.draw)
 end
 
 -- TEMPORARY: space = next kind, up = rotate clockwise.
 -- Needs love.keypressed forwarded to the active state.
 function game:keypressed(key)
-	if key == "space" then
+	if key == "left" then
+		input.push("left")
+	elseif key == "right" then
+		input.push("right")
+	elseif key == "down" then
+		input.push("down")
+	elseif key == "up" then
+		input.push("rotate_cw")
+	elseif key == "z" then
+		input.push("rotate_ccw")
+	elseif key == "space" then
 		ecs.destroy(current)
 		kind_index = kind_index % #shapes.kinds + 1
 		current = piece.spawn(shapes.kinds[kind_index])
-	elseif key == "up" then
-		ecs.set(current, rot, shapes.rotate_cw(ecs.get(current, rot)))
 	end
 end
 
