@@ -13,24 +13,48 @@ local controlled = require("src.fragments.controlled")
 
 local piece = {}
 
--- Center the n-wide box: (W - n) empty columns split left/right, floored,
--- +1 to convert the 0-based count into a 1-based column.
 local function start_col(piece_kind)
 	return math.floor((config.BOARD_W - shapes.size[piece_kind]) / 2) + 1
 end
 
-function piece.random_kind()
-	local random = (love and love.math and love.math.random) or math.random
-	return shapes.kinds[random(#shapes.kinds)]
+local bag, bag_size = {}, 0
+
+local function random(n)
+	local rng = (love and love.math and love.math.random) or math.random
+	return rng(n)
 end
 
--- False when the spawn position is already blocked (the stack reached the top).
+local function refill_bag()
+	for i, k in ipairs(shapes.kinds) do
+		bag[i] = k
+	end
+	bag_size = #shapes.kinds
+
+	for i = bag_size, 2, -1 do
+		local j = random(i)
+		bag[i], bag[j] = bag[j], bag[i]
+	end
+end
+
+function piece.reset_bag()
+	bag_size = 0
+end
+
+function piece.random_kind()
+	if bag_size == 0 then
+		refill_bag()
+	end
+
+	local k = bag[bag_size]
+	bag[bag_size] = nil
+	bag_size = bag_size - 1
+	return k
+end
+
 function piece.can_spawn(piece_kind)
 	return collision.fits(piece_kind, 1, start_col(piece_kind), 1)
 end
 
--- Spawns a piece with every fragment it will ever need, so no structural
--- changes (fragment add/remove) are required later.
 function piece.spawn(piece_kind)
 	return ecs.spawn({
 		[col] = start_col(piece_kind),

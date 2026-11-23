@@ -7,6 +7,8 @@ return {
 	SOFT_DROP_MULT = 20,
 	FALL_INTERVAL = 1.0,
 	LOCK_DELAY = 0.5,
+	DAS = 0.17,
+	ARR = 0.03,
 	ROTATION_KICKS = {
 		{ 0, 0 },
 		{ -1, 0 },
