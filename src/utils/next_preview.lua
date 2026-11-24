@@ -17,7 +17,7 @@ function next_preview.draw()
 	local panel_x = x0 - PAD
 	local panel_y = y0 - PAD
 	local panel_w = SLOT_W * CELL + 2 * PAD
-	local panel_h = PAD + HEADER + config.NEXT_COUNT * SLOT_H * CELL + PAD
+	local panel_h = 2 * PAD + HEADER + config.NEXT_COUNT * SLOT_H * CELL
 
 	love.graphics.setColor(0.08, 0.08, 0.10)
 	love.graphics.rectangle("fill", panel_x, panel_y, panel_w, panel_h, RADIUS, RADIUS)
@@ -38,8 +38,11 @@ function next_preview.draw()
 			min_x, max_x = math.min(min_x, c[1]), math.max(max_x, c[1])
 			min_y, max_y = math.min(min_y, c[2]), math.max(max_y, c[2])
 		end
-		local ox = (SLOT_W - (max_x - min_x + 1)) / 2
-		local oy = (SLOT_H - (max_y - min_y + 1)) / 2
+		local shape_w = max_x - min_x + 1
+		local shape_h = max_y - min_y + 1
+
+		local ox = math.floor((SLOT_W - shape_w) / 2)
+		local oy = math.floor((SLOT_H - shape_h) / 2)
 
 		local sy = y0 + HEADER + (i - 1) * SLOT_H * CELL
 		local rgb = colors[k]

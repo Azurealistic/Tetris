@@ -57,16 +57,35 @@ function game:update(dt)
 end
 
 function game:draw()
-	love.graphics.setColor(1, 1, 1)
-	love.graphics.rectangle(
-		"line",
-		config.BOARD_X,
-		config.BOARD_Y,
-		config.BOARD_W * config.CELL,
-		config.BOARD_H * config.CELL
-	)
+	local x = config.BOARD_X
+	local y = config.BOARD_Y
+	local w = config.BOARD_W * config.CELL
+	local h = config.BOARD_H * config.CELL
+
+	love.graphics.setColor(0.025, 0.025, 0.030, 1)
+	love.graphics.rectangle("fill", x, y, w, h, 8, 8)
+
+	love.graphics.setColor(1, 1, 1, 0.045)
+	love.graphics.setLineWidth(1)
+
+	for col = 1, config.BOARD_W - 1 do
+		local gx = x + col * config.CELL
+		love.graphics.line(gx, y, gx, y + h)
+	end
+
+	for row = 1, config.BOARD_H - 1 do
+		local gy = y + row * config.CELL
+		love.graphics.line(x, gy, x + w, gy)
+	end
 
 	ecs.process(groups.draw)
+
+	love.graphics.setColor(0.65, 0.65, 0.68, 0.9)
+	love.graphics.setLineWidth(2)
+	love.graphics.rectangle("line", x, y, w, h, 8, 8)
+
+	love.graphics.setLineWidth(1)
+
 	next_preview.draw()
 end
 
