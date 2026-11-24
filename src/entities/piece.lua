@@ -18,6 +18,7 @@ local function start_col(piece_kind)
 end
 
 local bag, bag_size = {}, 0
+local queue = {}
 
 local function random(n)
 	local rng = (love and love.math and love.math.random) or math.random
@@ -30,26 +31,46 @@ local function refill_bag()
 	end
 	bag_size = #shapes.kinds
 
+	-- Fisher-Yates shuffle: for i = n..2, swap bag[i] with a uniformly random
+	-- bag[j], j in 1..i. Each of the 7! orderings is equally likely.
 	for i = bag_size, 2, -1 do
 		local j = random(i)
 		bag[i], bag[j] = bag[j], bag[i]
 	end
 end
 
-function piece.reset_bag()
-	bag_size = 0
-end
-
-function piece.random_kind()
+local function deal_from_bag()
 	if bag_size == 0 then
 		refill_bag()
 	end
-
 	local k = bag[bag_size]
 	bag[bag_size] = nil
 	bag_size = bag_size - 1
 	return k
 end
+
+local function fill_queue(n)
+	while #queue < n do
+		queue[#queue + 1] = deal_from_bag()
+	end
+end
+
+function piece.reset_randomizer()
+	bag_size = 0
+	queue = {}
+end
+
+function piece.peek(i)
+	fill_queue(i)
+	return queue[i]
+end
+
+function piece.next_kind()
+	fill_queue(1)
+	return table.remove(queue, 1)
+end
+
+-- ---------------------------------------------------------------------------
 
 function piece.can_spawn(piece_kind)
 	return collision.fits(piece_kind, 1, start_col(piece_kind), 1)

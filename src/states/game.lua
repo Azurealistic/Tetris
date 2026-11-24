@@ -5,11 +5,13 @@ local input = require("src.utils.input")
 local board = require("src.utils.board")
 local autorepeat = require("src.utils.autorepeat")
 local piece = require("src.entities.piece")
+local next_preview = require("src.utils.next_preview")
 local controlled = require("src.fragments.controlled")
 
 -- Order matters: input -> gravity -> lock.
-require("src.systems.draw") -- groups.draw
-require("src.systems.draw_blocks") -- groups.draw
+require("src.systems.draw_blocks") -- groups.draw (1st)
+require("src.systems.ghost") -- groups.draw (2nd)
+require("src.systems.draw") -- groups.draw (3rd)
 require("src.systems.input") -- groups.update (1st)
 require("src.systems.gravity") -- groups.update (2nd)
 require("src.systems.lock") -- groups.update (3rd)
@@ -34,8 +36,8 @@ local function start()
 	board.clear()
 	input.clear()
 	autorepeat.clear()
-	piece.reset_bag()
-	piece.spawn(piece.random_kind())
+	piece.reset_randomizer()
+	piece.spawn(piece.next_kind())
 end
 
 function game:enter()
@@ -65,6 +67,7 @@ function game:draw()
 	)
 
 	ecs.process(groups.draw)
+	next_preview.draw()
 end
 
 function game:keypressed(key)

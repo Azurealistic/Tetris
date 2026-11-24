@@ -1,4 +1,3 @@
--- Locking = place four settled block entities, destroy the piece, spawn the next.
 local ecs = require("libs.evolved")
 local shapes = require("src.utils.shapes")
 local config = require("src.utils.config")
@@ -39,9 +38,9 @@ return ecs.builder()
 					end
 					ecs.destroy(entity_list[i])
 
-					-- board.place updated the index immediately, so this check
-					-- already sees the blocks that were just placed.
-					local next_kind = piece.random_kind()
+					board.clear_lines()
+
+					local next_kind = piece.next_kind()
 					if piece.can_spawn(next_kind) then
 						piece.spawn(next_kind)
 					else

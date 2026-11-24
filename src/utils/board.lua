@@ -1,4 +1,5 @@
 local ecs = require("libs.evolved")
+local config = require("src.utils.config")
 
 local fcol = require("src.fragments.col")
 local frow = require("src.fragments.row")
@@ -27,7 +28,54 @@ function board.place(kind, c, r)
 	return id
 end
 
--- Destroys every settled block and resets the game-over flag.
+local function row_full(r)
+	local line = board.cells[r]
+	if not line then
+		return false
+	end
+	for c = 1, config.BOARD_W do
+		if line[c] == nil then
+			return false
+		end
+	end
+	return true
+end
+
+function board.clear_lines()
+	local full, cleared = {}, 0
+	for r = 1, config.BOARD_H do
+		if row_full(r) then
+			full[r] = true
+			cleared = cleared + 1
+		end
+	end
+	if cleared == 0 then
+		return 0
+	end
+
+	local new_cells, shift = {}, 0
+	for r = config.BOARD_H, 1, -1 do
+		local line = board.cells[r]
+		if full[r] then
+			for _, id in pairs(line) do
+				ecs.destroy(id)
+			end
+			shift = shift + 1
+		elseif line then
+			local new_r = r + shift
+			if shift > 0 then
+				for _, id in pairs(line) do
+					ecs.set(id, frow, new_r)
+				end
+			end
+			new_cells[new_r] = line
+		end
+	end
+	board.cells = new_cells
+
+	return cleared
+end
+
 function board.clear()
 	for _, line in pairs(board.cells) do
 		for _, id in pairs(line) do
