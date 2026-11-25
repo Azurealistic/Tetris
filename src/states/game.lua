@@ -44,14 +44,15 @@ end
 function game:enter()
 	if not self.source then
         self.source = love.audio.newSource("assets/sounds/tetrismusic.wav", "stream")
-    end
+		self.source.setVolume(self.source, 0.25);
+	end
 	start()
 end
-
+ 
 function game:update(dt)
 	if not self.source:isPlaying() then
-        love.audio.play(self.source)
-    end
+		self.source:play()
+	end
 
 	input.soft_drop = love.keyboard.isDown("down")
 
