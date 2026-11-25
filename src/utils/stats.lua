@@ -1,4 +1,5 @@
 local config = require("src.utils.config")
+local audio = require("src.utils.audio")
 
 local stats = {}
 
@@ -21,6 +22,14 @@ end
 function stats.add_lines(count)
     if count < 1 then
         return
+    end
+
+    if count < 4 then
+        audio.play("clear")
+    end
+
+    if count == 4 then
+        audio.play("tetris")
     end
 
     count = math.min(count, #config.LINE_SCORES)

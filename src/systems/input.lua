@@ -4,7 +4,7 @@ local config = require("src.utils.config")
 local groups = require("src.utils.groups")
 local input = require("src.utils.input")
 local collision = require("src.utils.collision")
-
+local audio = require("src.utils.audio")
 local col = require("src.fragments.col")
 local row = require("src.fragments.row")
 local kind = require("src.fragments.kind")
@@ -46,20 +46,24 @@ return ecs.builder()
 				if action == "left" then
 					if fits(k, r, c - 1, rw) then
 						cols[i] = c - 1
+						audio.play("lateral_move")
 					end
 				elseif action == "right" then
 					if fits(k, r, c + 1, rw) then
 						cols[i] = c + 1
+						audio.play("lateral_move")
 					end
 				elseif action == "hard_drop" then
 					rows[i] = collision.drop_row(k, r, c, rw)
 					accs[i] = 0
 					timers[i] = config.LOCK_DELAY
+					audio.play("drop")
 				elseif action == "rotate_cw" or action == "rotate_ccw" then
 					local new_rot = action == "rotate_cw" and shapes.rotate_cw(r) or shapes.rotate_ccw(r)
 					local nc, nr, nrot = try_rotate(k, c, rw, new_rot)
 					if nc then
 						cols[i], rows[i], rots[i] = nc, nr, nrot
+						audio.play("rotate")
 					end -- else: refused, piece stays as it was
 				end
 			end

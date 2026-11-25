@@ -5,6 +5,7 @@ local autorepeat = require("src.utils.autorepeat")
 local board = require("src.utils.board")
 local piece = require("src.entities.piece")
 local stats = require("src.utils.stats")
+local audio = require("src.utils.audio")
 local board_view = require("src.utils.board_view")
 local next_preview = require("src.utils.next_preview")
 local score_panel = require("src.utils.score_panel")
@@ -39,6 +40,7 @@ local function start()
 	stats.reset()
 	autorepeat.clear()
 	piece.reset_randomizer()
+	audio.play("start")
 	piece.spawn(piece.next_kind())-- Load music (only once; keep it playing through the gameover screen and restarts).
 end
 
@@ -62,6 +64,7 @@ function game:update(dt)
 	ecs.process_with(groups.update, dt)
 
 	if board.game_over then
+		audio.play("gameover")
 		start()
 	end 
 end
