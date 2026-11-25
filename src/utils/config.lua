@@ -18,4 +18,8 @@ return {
 		{ -1, -1 },
 		{ 1, -1 },
 	},
+	START_LEVEL = 1,
+    LINES_PER_LEVEL = 5,
+    MAX_SPEED_LEVEL = 15,
+    LINE_SCORES = { 40, 100, 300, 1200 },
 }
