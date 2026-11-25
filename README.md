@@ -8,4 +8,5 @@ This game uses a collection of existing code and libraries designed for Love2D t
 - [Evolved](https://github.com/BlackMATov/evolved.lua) - Entity Component System (ECS).
 
 ## Preview:
-<video src="assets/videos/preview_v100.mp4" controls></video>
+https://github.com/user-attachments/assets/4bd57bf5-d2df-4b87-aa73-f95cafe7e299
+
