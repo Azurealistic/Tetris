@@ -1,9 +1,9 @@
 local panel = {
-    fill = { 0.09, 0.09, 0.09 },
+    fill = { 0.01, 0.01, 0.01 },
     border = { 0.78, 0.78, 0.78 },
     text = { 0.92, 0.92, 0.92 },
     muted = { 0.62, 0.62, 0.62 },
-    radius = 8,
+    radius = 4,
 }
 
 function panel.draw(x, y, w, h)
