@@ -36,6 +36,7 @@ local function start()
 	ecs.batch_destroy(controlled_query)
 	board.clear()
 	input.clear()
+	stats.reset()
 	autorepeat.clear()
 	piece.reset_randomizer()
 	piece.spawn(piece.next_kind())-- Load music (only once; keep it playing through the gameover screen and restarts).
