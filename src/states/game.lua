@@ -38,14 +38,21 @@ local function start()
 	input.clear()
 	autorepeat.clear()
 	piece.reset_randomizer()
-	piece.spawn(piece.next_kind())
+	piece.spawn(piece.next_kind())-- Load music (only once; keep it playing through the gameover screen and restarts).
 end
 
 function game:enter()
+	if not self.source then
+        self.source = love.audio.newSource("assets/sounds/tetrismusic.wav", "stream")
+    end
 	start()
 end
 
 function game:update(dt)
+	if not self.source:isPlaying() then
+        love.audio.play(self.source)
+    end
+
 	input.soft_drop = love.keyboard.isDown("down")
 
 	autorepeat.update(dt)
@@ -54,7 +61,7 @@ function game:update(dt)
 
 	if board.game_over then
 		start()
-	end
+	end 
 end
 
 function game:draw()
