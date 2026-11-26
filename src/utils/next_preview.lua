@@ -4,6 +4,8 @@ local colors = require("src.utils.colors")
 local fonts = require("src.utils.fonts")
 local layout = require("src.utils.layout")
 local panel = require("src.utils.panel")
+local tile = require("src.utils.tile")
+
 local piece = require("src.entities.piece")
 
 local next_preview = {}
@@ -30,6 +32,7 @@ function next_preview.draw()
     local slots_x = area.x + layout.PAD
     local slots_y = area.y + layout.PAD + area.title_h
 
+    tile.begin()
     for i = 1, config.NEXT_COUNT do
         local kind = piece.peek(i)
         local cells = shapes.cells(kind, 1)
@@ -41,14 +44,11 @@ function next_preview.draw()
         local top = slots_y + (i - 1) * area.slot_h + math.floor((area.slot_h - height) / 2)
 
         local rgb = colors[kind]
-        love.graphics.setColor(rgb[1], rgb[2], rgb[3])
         for _, c in ipairs(cells) do
-            love.graphics.rectangle("fill",
-                left + (c[1] - min_x) * cell,
-                top + (c[2] - min_y) * cell,
-                cell - 1, cell - 1)
+            tile.draw(left + (c[1] - min_x) * cell, top + (c[2] - min_y) * cell, rgb)
         end
     end
+    tile.finish()
 end
 
 return next_preview

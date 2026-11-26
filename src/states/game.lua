@@ -10,6 +10,7 @@ local board_view = require("src.utils.board_view")
 local next_preview = require("src.utils.next_preview")
 local score_panel = require("src.utils.score_panel")
 local controlled = require("src.fragments.controlled")
+local shaders = require("src.utils.shaders")
 
 require("src.systems.draw_blocks")
 require("src.systems.ghost")
@@ -19,6 +20,7 @@ require("src.systems.gravity")
 require("src.systems.lock")
 
 local game = {}
+BACKGROUND_TIME = 0
 
 local KEYMAP = {
 	left = "left",
@@ -53,6 +55,12 @@ function game:enter()
 end
  
 function game:update(dt)
+	BACKGROUND_TIME = BACKGROUND_TIME + dt
+	shaders.background:send("time", BACKGROUND_TIME)
+
+	local width, height = love.graphics.getDimensions()
+    shaders.background:send("resolution", {width, height})
+
 	if not self.source:isPlaying() then
 		self.source:play()
 	end
@@ -70,6 +78,11 @@ function game:update(dt)
 end
 
 function game:draw()
+	local width, height = love.graphics.getDimensions()
+	love.graphics.setShader(shaders.background)
+    love.graphics.rectangle("fill", 0, 0, width, height)
+    love.graphics.setShader()
+
     board_view.draw()
     ecs.process(groups.draw)
     next_preview.draw()

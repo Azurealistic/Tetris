@@ -3,6 +3,7 @@ local config = require("src.utils.config")
 local colors = require("src.utils.colors")
 local layout = require("src.utils.layout")
 local groups = require("src.utils.groups")
+local tile = require("src.utils.tile")
 
 local col = require("src.fragments.col")
 local row = require("src.fragments.row")
@@ -21,13 +22,14 @@ return ecs.builder()
         local rows = chunk:components(row)
         local kinds = chunk:components(kind)
 
+        tile.begin()
         for i = 1, entity_count do
-            local c = colors[kinds[i]]
-            love.graphics.setColor(c[1], c[2], c[3])
-            love.graphics.rectangle("fill",
+            tile.draw(
                 BX + (cols[i] - 1) * CELL,
                 BY + (rows[i] - 1) * CELL,
-                CELL - 1, CELL - 1)
+                colors[kinds[i]]
+            )
         end
+        tile.finish()
     end)
     :build()
